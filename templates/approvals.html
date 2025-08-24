@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Pending Approvals{% endblock %}
+{% block content %}
+    <h1>Pending Attendance Approvals</h1>
+    {% if approvals %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Event</th>
+                    <th>Requested By</th>
+                    <th>Request Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for approval in approvals %}
+                    <tr>
+                        <td>{{ approval.member.name }} ({{ approval.member.roll_no }})</td>
+                        <td>{{ approval.event.name }}</td>
+                        <td>{{ approval.taker.username }}</td>
+                        <td>{{ approval.request_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="approval_id" value="{{ approval.id }}">
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form method="POST" style="display:inline;" class="ms-2">
+                                <input type="hidden" name="approval_id" value="{{ approval.id }}">
+                                <input type="hidden" name="action" value="reject">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="admin_note" class="form-control" placeholder="Reason for rejection">
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No pending approvals.</p>
+    {% endif %}
+{% endblock %}

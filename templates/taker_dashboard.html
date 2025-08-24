@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Taker Dashboard{% endblock %}
+{% block content %}
+    <h1>Welcome, {{ current_user.username }} (Attendance Taker)</h1>
+    <h2>Upcoming Events</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+                <tr>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.date_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ event.location }}</td>
+                    <td>{{ event.type }}</td>
+                    <td>
+                        <a href="{{ url_for('mark_attendance', event_id=event.id) }}" class="btn btn-primary btn-sm">Mark Attendance</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

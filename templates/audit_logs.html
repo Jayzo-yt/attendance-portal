@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Audit Logs{% endblock %}
+{% block content %}
+    <h1>Audit Logs</h1>
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-header">Filter Logs</div>
+        <div class="card-body">
+            <form method="GET">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="username" class="form-label">Filter by User</label>
+                        <select name="username" id="username" class="form-control">
+                            <option value="">All Users</option>
+                            {% for user in users %}
+                                <option value="{{ user.username }}" {% if request.args.get('username') == user.username %}selected{% endif %}>{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+    <!-- Audit Logs Table -->
+    {% if logs %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.user.username if log.user else 'Unknown' }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">No audit logs available.</p>
+    {% endif %}
+{% endblock %}

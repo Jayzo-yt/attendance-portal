@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Manage Members{% endblock %}
+{% block content %}
+    <h1>Manage Members</h1>
+    <!-- Add Member Form -->
+    <div class="card mb-4">
+        <div class="card-header">Add New Member</div>
+        <div class="card-body">
+            <form method="POST" id="addMemberForm">
+                <input type="hidden" name="action" value="add">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="roll_no" class="form-label">Roll No</label>
+                        <input type="text" name="roll_no" id="roll_no" class="form-control" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" name="name" id="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="class_name" class="form-label">Class</label>
+                        <input type="text" name="class_name" id="class_name" class="form-control">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="contact" class="form-label">Contact</label>
+                        <input type="text" name="contact" id="contact" class="form-control">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="club_role" class="form-label">Club Role</label>
+                        <select name="club_role" id="club_role" class="form-control">
+                            <option value="Member">Member</option>
+                            <option value="President">President</option>
+                            <option value="Treasurer">Treasurer</option>
+                            <option value="Organizer">Organizer</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Member</button>
+            </form>
+        </div>
+    </div>
+    <!-- Members Table -->
+    <h2>Members List</h2>
+    <table class="table table-striped" id="membersTable">
+        <thead>
+            <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Contact</th>
+                <th>Club Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+                <tr>
+                    <td>{{ member.roll_no }}</td>
+                    <td>{{ member.name }}</td>
+                    <td>{{ member.class_name or 'N/A' }}</td>
+                    <td>{{ member.contact or 'N/A' }}</td>
+                    <td>{{ member.club_role or 'N/A' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ member.id }}">Edit</button>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id" value="{{ member.id }}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <!-- Edit Modal -->
+                <div class="modal fade" id="editModal{{ member.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ member.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel{{ member.id }}">Edit Member</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="edit">
+                                    <input type="hidden" name="id" value="{{ member.id }}">
+                                    <div class="mb-3">
+                                        <label for="roll_no_{{ member.id }}" class="form-label">Roll No</label>
+                                        <input type="text" name="roll_no" id="roll_no_{{ member.id }}" class="form-control" value="{{ member.roll_no }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="name_{{ member.id }}" class="form-label">Name</label>
+                                        <input type="text" name="name" id="name_{{ member.id }}" class="form-control" value="{{ member.name }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="class_name_{{ member.id }}" class="form-label">Class</label>
+                                        <input type="text" name="class_name" id="class_name_{{ member.id }}" class="form-control" value="{{ member.class_name or '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="contact_{{ member.id }}" class="form-label">Contact</label>
+                                        <input type="text" name="contact" id="contact_{{ member.id }}" class="form-control" value="{{ member.contact or '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="club_role_{{ member.id }}" class="form-label">Club Role</label>
+                                        <select name="club_role" id="club_role_{{ member.id }}" class="form-control">
+                                            <option value="Member" {% if member.club_role == 'Member' %}selected{% endif %}>Member</option>
+                                            <option value="President" {% if member.club_role == 'President' %}selected{% endif %}>President</option>
+                                            <option value="Treasurer" {% if member.club_role == 'Treasurer' %}selected{% endif %}>Treasurer</option>
+                                            <option value="Organizer" {% if member.club_role == 'Organizer' %}selected{% endif %}>Organizer</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- JavaScript for Client-Side Validation -->
+    <script>
+        document.getElementById('addMemberForm').addEventListener('submit', function(e) {
+            const rollNo = document.getElementById('roll_no').value;
+            const existingRollNos = Array.from(document.querySelectorAll('#membersTable tbody td:first-child'))
+                .map(td => td.textContent);
+            if (existingRollNos.includes(rollNo)) {
+                e.preventDefault();
+                alert('Roll No "' + rollNo + '" is already in use. Please use a unique Roll No or edit the existing member.');
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Statistics{% endblock %}
+{% block content %}
+    <h1>Attendance Statistics</h1>
+    <div class="mb-4">
+        <a href="{{ url_for('export_statistics', format='csv') }}" class="btn btn-primary me-2">Export as CSV</a>
+        <a href="{{ url_for('export_statistics', format='pdf') }}" class="btn btn-primary">Export as PDF</a>
+    </div>
+
+    <!-- Member Attendance Table -->
+    <h2>Member Attendance</h2>
+    {% if stats %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Events Attended</th>
+                    <th>Attendance %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in stats %}
+                    <tr {% if stat.percentage < 50 %}class="table-warning"{% endif %}>
+                        <td>{{ stat.roll_no }}</td>
+                        <td>{{ stat.name }}</td>
+                        <td>{{ stat.attended }}</td>
+                        <td>{{ stat.percentage }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">No attendance data available. Add members and mark attendance to see statistics.</p>
+    {% endif %}
+
+    <!-- Low Participation Alerts -->
+    {% if low_participation %}
+        <h2>Low Participation Alerts (&lt;50%)</h2>
+        <div class="alert alert-warning">
+            <ul>
+                {% for stat in low_participation %}
+                    <li>{{ stat.name }} ({{ stat.roll_no }}): {{ stat.percentage }}%</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p class="text-muted">No members with low participation.</p>
+    {% endif %}
+
+    
+    <div class="row">
+        <div class="col-md-6 col-12 mb-4">
+            <h3>Events Attended per Member</h3>
+            {% if stats %}
+                <canvas id="memberChart"></canvas>
+            {% else %}
+                <p class="text-muted">No data for member attendance chart.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6 col-12 mb-4">
+            <h3>Attendance by Event Type</h3>
+            {% if type_stats %}
+                <canvas id="typeChart"></canvas>
+            {% else %}
+                <p class="text-muted">No data for event type chart.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        {% if stats %}
+        
+        const memberCtx = document.getElementById('memberChart').getContext('2d');
+        new Chart(memberCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for stat in stats %}'{{ stat.name }} ({{ stat.roll_no }})'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Events Attended',
+                    data: [{% for stat in stats %}{{ stat.attended }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Events Attended' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Members' }
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        {% if type_stats %}
+        
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        const colors = [
+            '#007bff','#28a745','#dc3545','#ffc107',
+            '#6f42c1','#fd7e14','#20c997','#6610f2'
+        ];
+        new Chart(typeCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for type in type_stats %}'{{ type.type }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for type in type_stats %}{{ type.attended }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: colors.slice(0, {{ type_stats|length }}),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Attendance by Event Type' }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+{% endblock %}
