@@ -12,7 +12,7 @@ from flask import request, flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from sqlalchemy.exc import IntegrityError   # ✅ Fix
+from sqlalchemy.exc import IntegrityError   
 from datetime import date
 
 app = Flask(__name__)
