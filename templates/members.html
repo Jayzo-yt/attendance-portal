@@ -35,7 +35,7 @@
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Member</button>
+                <button type="submit" class="btn btn-dark">Add Member</button>
             </form>
         </div>
     </div>
@@ -61,7 +61,7 @@
                     <td>{{ member.contact or 'N/A' }}</td>
                     <td>{{ member.club_role or 'N/A' }}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ member.id }}">Edit</button>
+                        <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#editModal{{ member.id }}">Edit</button>
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="{{ member.id }}">
